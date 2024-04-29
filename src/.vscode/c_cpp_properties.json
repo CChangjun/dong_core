@@ -1,0 +1,30 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/ihlab/catkin_ws/devel/include/**",
+        "/home/ihlab/catkin_ws_car/install_isolated/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/ihlab/catkin_ws/src/dong_core/include/**",
+        "/home/ihlab/catkin_ws/src/dong_core_test/include/**",
+        "/home/ihlab/catkin_ws/src/dong_ros_pkg1/include/**",
+        "/home/ihlab/catkin_ws/src/dong_teleop/include/**",
+        "/home/ihlab/catkin_ws/src/hls_lfcd_lds_driver/include/**",
+        "/home/ihlab/catkin_ws/src/ld08_driver/include/**",
+        "/home/ihlab/catkin_ws/src/oroca_ros_tutorials/include/**",
+        "/home/ihlab/catkin_ws/src/turtlebot3/turtlebot3_slam/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
