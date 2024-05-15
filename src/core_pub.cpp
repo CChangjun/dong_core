@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
   char joint_state_header_frame_id[30];
   tf::Transform transform;
   std::string turtle_name;
-  turtle_name = argv[1];
+  //turtle_name = argv[1];
   tf_broadcaster.sendTransform(odom_tf);
 
   double x = 0.0;
