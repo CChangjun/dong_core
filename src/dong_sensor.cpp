@@ -20,25 +20,28 @@ dong_core::sensor sensor_msg;
 
 uint8_t testStr_1[] = {0xab};
 
-void msgCallback(const dong_core::sensor::ConstPtr& msg)
+void checkCallBACK(const dong_core::sensor::ConstPtr& msg)
 {
   sensor_msg.quest = msg->quest;
 
   if(sensor_msg.quest==true)
   {
-    ser.write(testStr_1,1);
+    //ser.write(testStr_1,1);
     flag = 1;
     sensor_msg.quest = false;
   }
 }
 
-void msgCallback_1(const geometry_msgs::Twist::ConstPtr& msg)
+void ser_msgCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
-  sprintf(BufferPacket,"%f,%fa",msg->linear.x,msg->angular.z);
+  uint8_t linear_x_8bit =  (uint8_t)(msg->linear.x);
+  uint8_t angular_z_8bit = (uint8_t)(msg->angular.z);
+
+  snprintf(BufferPacket, sizeof(BufferPacket), "%.1f,%.1f\n", msg->linear.x, msg->angular.z);
+  //### initializing argument :Serial::write(const uint8_t*, size_t)’
   ser.write(BufferPacket);
-  ROS_INFO("------------------------------------------");
-  ROS_INFO("send : linear: %f, angular : %f",msg->linear.x,msg->angular.z);
-  ROS_INFO("------------------------------------------");  
+  //ROS_INFO("send fin %d,%d", BufferPacket[0],BufferPacket[1]);
+  ROS_INFO("--------------------------------");
 }
 
 
@@ -47,8 +50,8 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "dong_sensor"); 
   ros::NodeHandle nh;                                   
   ros::Publisher sensor_pub = nh.advertise<dong_core::sensor>("sensor_encoder", 10);
-  ros::Subscriber dong_ros_sub = nh.subscribe("cmd_vel_serial", 100, msgCallback_1);
-  ros::Subscriber sensor_sub = nh.subscribe("sensor_encoder_1", 5, msgCallback);
+  ros::Subscriber dong_ros_sub = nh.subscribe("cmd_vel_serial", 100, ser_msgCallback);
+  ros::Subscriber sensor_sub = nh.subscribe("sensor_encoder_1", 5, checkCallBACK);
 
   sensor_msg.quest = false;
   
@@ -99,10 +102,11 @@ int main(int argc, char **argv)
 //        sensor_msg.left_encoder = left_encoder*0.0325; 
 //        sensor_msg.right_encoder = right_encoder*0.0325; 32.5ms로 변환
         sensor_msg.left_encoder = left_encoder; 
-        sensor_msg.right_encoder = right_encoder; //100ms로 볗놘        
+        sensor_msg.right_encoder = right_encoder; //100ms로 변환       
         sensor_msg.yaw_angle = yaw_angle;   
         ROS_INFO("recive : left_encoder: %f, right_encoder : %f, yaw_angle : %f",left_encoder,right_encoder,yaw_angle);
         sensor_pub.publish(sensor_msg);
+
         flag = 0;
      }
 

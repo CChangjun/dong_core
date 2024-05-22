@@ -307,7 +307,9 @@ bool calcOdometry(double diff_time)
   double delta_s, theta, delta_theta;
   static double last_theta = 0.0;
   double v, w;                  // v = translational velocity [m/s], w = rotational velocity [rad/s]
-  double step_time;
+  double step_time;ensor>("sensor_encoder", 10);
+  ros::Subscriber dong_ros_sub = nh.subscribe("cmd_vel_serial", 100, msgCallback_1);
+  ros::Subscriber sensor_sub = nh.subscribe("sensor_encoder_1", 5, msgCal
 
   wheel_l = wheel_r = 0.0;
   delta_s = delta_theta = theta = 0.0;
@@ -331,7 +333,9 @@ bool calcOdometry(double diff_time)
   theta = yaw_angle;
   ROS_INFO("%f a",theta);
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-  delta_theta = theta - last_theta; 
+  delta_theta = theta - last_theta; ensor>("sensor_encoder", 10);
+  ros::Subscriber dong_ros_sub = nh.subscribe("cmd_vel_serial", 100, msgCallback_1);
+  ros::Subscriber sensor_sub = nh.subscribe("sensor_encoder_1", 5, msgCal
 
   odom_pose[0] += delta_s * cos(odom_pose[2] + (delta_theta / 2.0));
   odom_pose[1] += delta_s * sin(odom_pose[2] + (delta_theta / 2.0));

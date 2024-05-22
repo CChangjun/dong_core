@@ -76,6 +76,7 @@ ros::Time rosNow(void);
 clock_t t; 
 clock_t end;
 static uint32_t tTime[10];
+
 float constrain(float input, float low, float high);
 void updateGoalVelocity(void);
 void publishDriveInformation(void);
@@ -111,8 +112,8 @@ void msgCallback(const dong_core::sensor::ConstPtr& msg)
   left_encoder = msg->left_encoder;
   right_encoder = msg->right_encoder;
   yaw_angle = msg->yaw_angle;
-  pitch_angle = msg->pitch_angle;
-  roll_angle = msg->roll_angle;  
+  pitch_angle = msg->pitch_angle;// 이 두 개는 필요 없지 않나?
+  roll_angle = msg->roll_angle;  //
 
   /*
   unsigned long time_now = clock();
@@ -142,6 +143,7 @@ int main(int argc, char* argv[])
   ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry >("odom", 1);
   ros::Publisher cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("cmd_vel_serial", 1);
   ros::Publisher joint_states_pub = nh.advertise<turtlebot3_msgs::SensorState>("joint_states", 1);
+  //ros::Publisher joint_states_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   ros::Subscriber sensor_sub = nh.subscribe("sensor_encoder", 5, msgCallback);
   ros::Publisher sensor_pub = nh.advertise<dong_core::sensor >("sensor_encoder_1", 5);
   ros::Publisher imu_data_pub = nh.advertise<sensor_msgs::Imu>("imu", 1); //imu 토픽을 바꿈
@@ -177,7 +179,8 @@ int main(int argc, char* argv[])
       if (!strcmp(get_tf_prefix.c_str(), ""))
       {
         sprintf(odom_header_frame_id, "odom");
-        sprintf(odom_child_frame_id, "base_footprint");  
+        sprintf(odom_child_frame_id, "footprint");  
+        sprintf(joint_state_header_frame_id, "base_link");//추가사항
         sprintf(imu_frame_id, "imu_link");
 
       }
@@ -185,12 +188,12 @@ int main(int argc, char* argv[])
       {
         strcpy(odom_header_frame_id, get_tf_prefix.c_str());
         strcpy(odom_child_frame_id, get_tf_prefix.c_str());
-
         strcpy(joint_state_header_frame_id, get_tf_prefix.c_str());
 
         strcat(odom_header_frame_id, "/odom");
         strcat(imu_frame_id, "/imu_link");
-        strcat(odom_child_frame_id, "/base_footprint");
+        strcat(odom_child_frame_id, "/footprint");
+         strcat(joint_state_header_frame_id, "/base_link");//추가사항 
 
       }
       isChecked = true;
@@ -220,7 +223,7 @@ int main(int argc, char* argv[])
       {
         updateMotorInfo(left_encoder,right_encoder);
         sampling = 0.001*float(t-tTime[2]);
-        ROS_INFO("%f",sampling);
+        //ROS_INFO("%f",sampling);
         calcOdometry();
         updateOdometry(); 
         odom.header.stamp = ros::Time::now();
@@ -231,7 +234,7 @@ int main(int argc, char* argv[])
         updateJointStates();
         joint_states.header.stamp = ros::Time::now();
         joint_states_pub.publish(joint_states);
-/*
+
         tf::Quaternion orientation = tf::createQuaternionFromRPY(roll_angle , pitch_angle, yaw_angle);
         imu_data_msg.orientation.x = orientation[0];
 			  imu_data_msg.orientation.y = orientation[1];
@@ -241,12 +244,12 @@ int main(int argc, char* argv[])
 			  imu_data_msg.header.frame_id = "imu_link"; 
         imu_data_pub.publish(imu_data_msg);
 
-				transform.setOrigin( tf::Vector3(0.0, 0.0, 0.2) );
+				transform.setOrigin( tf::Vector3(0.0, 0.0, 0.2) ); // 조금 수정해야 함
 				tf::Quaternion q;
 				q.setRPY(roll_angle , pitch_angle, yaw_angle);
 				transform.setRotation(q);
 				br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "base_link", "imu_link")); 
-*/
+        ROS_INFO("%f",yaw_angle);
         flag = 0;
       }
 
@@ -307,7 +310,7 @@ bool calcOdometry(void)
   double wheel_l, wheel_r,wheel_l_distance, wheel_r_distance;      // rotation value of wheel [rad]
   double delta_s, theta, delta_theta, theta_1;
   static double last_theta = 0.0;
-
+ 
   wheel_l = wheel_r = 0.0;
   delta_s = delta_theta = theta = 0.0;
 
@@ -326,7 +329,8 @@ bool calcOdometry(void)
   odom_pose[1] += delta_s * sin(odom_pose[2] + (delta_theta / 2.0));
   odom_pose[2] = theta;
 
-  ROS_INFO("%f %f %f %f ",delta_s,odom_pose[0], odom_pose[1],odom_pose[2]);
+  
+  //ROS_INFO("%f %f %f %f ",delta_s,odom_pose[0], odom_pose[1],odom_pose[2]);
 
   last_theta = theta;
 
@@ -350,7 +354,8 @@ void updateJointStates(void)
 {
   static float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
   static float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
-
+ // float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
+ // float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
   joint_states_pos[LEFT]  = last_rad[LEFT];
   joint_states_pos[RIGHT] = last_rad[RIGHT];
 
